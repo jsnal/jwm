@@ -17,4 +17,8 @@ class WindowManager {
     static int OnXError(Display* display, XErrorEvent* e);
     static int OnWMDetected(Display* display, XErrorEvent* e);
     static bool wm_detected_;
+
+    void OnCreateNotify(const XCreateWindowEvent& e);
+    void OnDestroyNotify(const XDestroyWindowEvent& e);
+    void OnReparentNotify(const XReparentEvent& e);
 };

@@ -45,6 +45,25 @@ void WindowManager::Run()
   }
 
   XSetErrorHandler(&WindowManager::OnXError);
+
+  for (;;)
+  {
+    XEvent e;
+    XNextEvent(display_, &e);
+
+    switch (e.type)
+    {
+      case CreateNotify:
+        OnCreateNotify(e.xcreatewindow);
+        break;
+      case DestroyNotify:
+        OnDestroyNotify(e.xdestroywindow);
+        break;
+      case ReparentNotify:
+        OnReparentNotify(e.xreparent);
+        break;
+    }
+  }
 }
 
 int WindowManager::OnWMDetected(Display* display, XErrorEvent* e)
@@ -59,3 +78,7 @@ int WindowManager::OnXError(Display* display, XErrorEvent* e)
   LOG(ERROR) << e;
   return 0;
 }
+
+void WindowManager::OnCreateNotify(const XCreateWindowEvent& e) {}
+void WindowManager::OnDestroyNotify(const XDestroyWindowEvent& e) {}
+void WindowManager::OnReparentNotify(const XReparentEvent& e) {}
