@@ -6,7 +6,8 @@ LDFLAGS += `pkg-config --libs x11 libglog`
 all: jwm
 
 HEADER = \
-		src/window_manager.hh
+		src/window_manager.hh \
+		src/jwm_constants
 
 SOURCES = \
 		src/main.cc \

@@ -1,7 +1,11 @@
+#ifndef WINDOW_MANAGER_HH
+#define WINDOW_MANAGER_HH
+
 extern "C" {
   #include <X11/Xlib.h>
 }
 #include <memory>
+#include <unordered_map>
 
 class WindowManager {
   public:
@@ -20,10 +24,17 @@ class WindowManager {
 
     void OnConfigureRequest(const XConfigureRequestEvent& e);
     void OnMapRequest(const XMapRequestEvent& e);
+    void OnUnmapNotify(const XUnmapEvent& e);
     void OnCreateNotify(const XCreateWindowEvent& e);
+    void OnConfigureNotify(const XConfigureEvent& e);
     void OnDestroyNotify(const XDestroyWindowEvent& e);
     void OnReparentNotify(const XReparentEvent& e);
 
     /* Map Helpers */
     void Frame(Window w, bool isPrexisting);
+    void Unframe(Window w);
+
+    ::std::unordered_map<Window, Window> clients_;
 };
+
+#endif
