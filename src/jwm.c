@@ -1,15 +1,16 @@
-#include "jwm.hh"
+#include "jwm.h"
+#include "event.h"
 
 Display* display;
 Window root;
 
 bool JXCreate()
 {
-  display = XOpenDisplay(nullptr);
+  display = XOpenDisplay(NULL);
 
-  if (display == nullptr)
+  if (display == NULL)
   {
-    std::cout << "Failed to open X display" << XDisplayName(nullptr) << std::endl;
+    printf("Failed to open X display%s\n", XDisplayName(NULL));
     return false;
   }
 
@@ -59,6 +60,8 @@ void JXStart()
 
   XFree(childrenReturn);
   XUngrabServer(display);
+
+  /* StartEventListener(); */
 }
 
 int OnXError(Display* display, XErrorEvent* e)
@@ -67,15 +70,15 @@ int OnXError(Display* display, XErrorEvent* e)
   char error_text[MAX_ERROR_TEXT_LENGTH];
   XGetErrorText(display, e->error_code, error_text, sizeof(error_text));
   printf("Received X error:\n");
-  printf("\tRequest: %d - %d\n", int(e->request_code), e->request_code);
-  printf("\tError Code: %d - %s\n", int(e->error_code), error_text);
+  printf("\tRequest: %d - %d\n", (int)e->request_code, e->request_code);
+  printf("\tError Code: %d - %s\n", (int)e->error_code, error_text);
   printf("\tResource ID: %ld\n", e->resourceid);
   return 0;
 }
 
 int OnWMDetected(Display* display, XErrorEvent* e)
 {
-  if (static_cast<int>(e->error_code) == BadAccess)
+  if ((int)e->error_code == BadAccess)
   {
     wmFound = true;
   }

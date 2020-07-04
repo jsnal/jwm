@@ -1,7 +1,4 @@
-extern "C" {
-  #include <X11/Xlib.h>
-}
-#include "window_manager.hh"
+#include "jwm.h"
 
 typedef struct ClientNode {
   Window window; // Client window
@@ -15,7 +12,4 @@ typedef struct ClientNode {
   int border_width;
 } ClientNode;
 
-class Client {
-  public:
-    ClientNode* AddClientWindow(Window w, bool isMapped);
-};
+ClientNode* AddClientWindow(Window w, bool isMapped);
