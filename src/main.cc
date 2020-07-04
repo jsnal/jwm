@@ -1,21 +1,17 @@
 #include <cstdlib>
-#include <glog/logging.h>
-#include "window_manager.hh"
+#include "jwm.hh"
 
 using ::std::unique_ptr;
 
 int main(int argc, char** argv)
 {
-  ::google::InitGoogleLogging(argv[0]);
-
-  unique_ptr<WindowManager> window_manager(WindowManager::Create());
-  if (!window_manager)
+  if (!JXCreate())
   {
-    LOG(ERROR) << "Failed to init window manager";
+    std::cout << "Failed to init window manager" << std::endl;
     return EXIT_FAILURE;
   }
 
-  window_manager->Run();
+  JXStart();
 
   return EXIT_SUCCESS;
 }
