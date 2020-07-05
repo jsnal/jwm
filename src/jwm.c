@@ -1,5 +1,4 @@
 #include "jwm.h"
-#include "event.h"
 
 Display* display;
 Window root;
@@ -54,14 +53,15 @@ void JXStart()
 
   if (rootReturn != root) return;
 
-  printf("%d", childrenCount);
+  nodes = (ClientNode*) malloc(childrenCount * sizeof(ClientNode));
+
   for (unsigned int i = 0; i < childrenCount; i++)
-    printf("%d", i);
+    nodes[i] = *AddClientWindow(childrenReturn[i], true);
 
   XFree(childrenReturn);
   XUngrabServer(display);
 
-  /* StartEventListener(); */
+  StartEventListener();
 }
 
 int OnXError(Display* display, XErrorEvent* e)

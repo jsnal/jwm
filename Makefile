@@ -1,25 +1,27 @@
 CC = gcc
-CFLAGS = -I. -Wall
-CFLAGS += `pkg-config --cflags x11`
-LDFLAGS += `pkg-config --libs x11`
+
+LIBS = -lX11 -lstdc++
+CFLAGS = -I. -Wall $(LIBS)
 
 all: jwm
 
 HEADER = \
 		src/jwm.h \
 		src/client.h \
+		src/event.h \
 		src/jwm_constants.h
 
 SOURCES = \
-		src/main.c \
 		src/jwm.c \
-		src/client.c
+		src/client.c \
+		src/event.c \
+		src/main.c
 
 EXECUTABLE = $(OUTPUTS:%=$(BIN)/%)
 OBJECTS = $(SOURCES:.c=.o)
 
 jwm: $(HEADERS) $(OBJECTS)
-	$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
+	$(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(LIBS)
 
 .PHONY: clean
 clean:
