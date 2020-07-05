@@ -1,7 +1,8 @@
 CC = gcc
 
 LIBS = -lX11 -lstdc++
-CFLAGS = -I. -Wall $(LIBS)
+INCLUDES = -I/usr/include/freetype2
+CFLAGS = -I. -Wall $(LIBS) $(INCLUDES)
 
 all: jwm
 

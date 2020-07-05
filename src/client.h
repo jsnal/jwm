@@ -7,20 +7,19 @@
 #include <string.h>
 #include <stdlib.h>
 
-typedef struct ClientNode {
+typedef struct Client {
   Window window; // Client window
-  Window parent; // Frame window
-
-  Window owner;
 
   int x, y;
-  int width;
-  int height;
+  int width, height;
+  int m_top, m_bottom, m_left, m_right;
   int border_width;
-} ClientNode;
 
-ClientNode* AddClientWindow(Window w, bool isMapped);
+  struct Client *next;
+} Client;
 
-ClientNode* nodes;
+Client* AddClientWindow(Window w, bool isMapped);
 
+// Master list of all the known clients
+static struct Client *clients = NULL;
 #endif

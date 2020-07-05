@@ -53,10 +53,8 @@ void JXStart()
 
   if (rootReturn != root) return;
 
-  nodes = (ClientNode*) malloc(childrenCount * sizeof(ClientNode));
-
   for (unsigned int i = 0; i < childrenCount; i++)
-    nodes[i] = *AddClientWindow(childrenReturn[i], true);
+    AddClientWindow(childrenReturn[i], true);
 
   XFree(childrenReturn);
   XUngrabServer(display);

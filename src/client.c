@@ -1,50 +1,71 @@
 #include "client.h"
 
-ClientNode* AddClientWindow(Window w, bool isMapped)
+#include <X11/Xft/Xft.h>
+
+static void SaveClient(Client* client);
+static Client* GetClientFromWindow(Window w);
+static void CreateDecorations(Client* client);
+
+Client* AddClientWindow(Window w, bool isMapped)
 {
   XWindowAttributes attr;
-  ClientNode *np;
+  Client *cp;
 
-  if (XGetWindowAttributes(display, w, &attr) == 0) return NULL;
+  if (XGetWindowAttributes(display, w, &attr) == 0 ||
+      attr.override_redirect == True ||
+      GetClientFromWindow(w))
+    return NULL;
 
-  if (attr.override_redirect == True) return NULL;
+  cp = (Client*) malloc(sizeof(Client));
 
-  np = (ClientNode*) malloc(sizeof(ClientNode));
-  memset(np, 0, sizeof(ClientNode));
+  cp->window = w;
 
-  np->window = w;
-  np->parent = None;
-  np->owner  = None;
+  cp->x = attr.x;
+  cp->y = attr.y;
+  cp->width  = attr.width;
+  cp->height = attr.height;
+  cp->border_width = attr.border_width;
 
-  np->x = attr.x;
-  np->y = attr.y;
-  np->width  = attr.width;
-  np->height = attr.height;
-  np->border_width = attr.border_width;
-
-  np->parent = XCreateSimpleWindow(
-      display,
-      root,
-      attr.x,
-      attr.y,
-      attr.width,
-      attr.height,
-      BORDER_WIDTH,
-      BORDER_COLOR,
-      BACKGROUND_COLOR);
+  XSetWindowBorder(display, cp->window, 0);
 
   XSelectInput(
       display,
-      np->parent,
+      cp->window,
       SubstructureRedirectMask | SubstructureNotifyMask);
 
-  XReparentWindow(
-      display,
-      np->window,
-      np->parent,
-      0, 0);
+  SaveClient(cp);
 
-  XMapWindow(display, np->parent);
+  XMapWindow(display, cp->window);
 
-  return np;
+  return cp;
+}
+
+void CreateDecorations(Client *client)
+{
+  XSetWindowAttributes wa = {
+    .override_redirect = True,
+    .event_mask = ExposureMask,
+  };
+  XClassHint ch = {
+    .res_class = "JWM", // TODO: Put in a MACRO
+    .res_name = "decoration",
+  };
+
+}
+
+void SaveClient(Client *client)
+{
+  client->next = clients;
+  clients = client;
+}
+
+Client* GetClientFromWindow(Window w)
+{
+  struct Client* cp;
+
+  for (cp = clients; cp; cp = cp->next)
+    if (cp->window == w)
+      return cp;
+
+  return NULL;
 }
