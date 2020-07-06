@@ -3,13 +3,12 @@
 #include <X11/Xft/Xft.h>
 
 static void SaveClient(Client* client);
-static Client* GetClientFromWindow(Window w);
 static void CreateDecorations(Client* client);
 
-Client* AddClientWindow(Window w, bool isMapped)
+Client* AddClientWindow(Window w)
 {
   XWindowAttributes attr;
-  Client *cp;
+  Client* cp;
 
   if (XGetWindowAttributes(display, w, &attr) == 0 ||
       attr.override_redirect == True ||
@@ -26,8 +25,7 @@ Client* AddClientWindow(Window w, bool isMapped)
   cp->height = attr.height;
   cp->border_width = attr.border_width;
 
-  XSetWindowBorderWidth(display, cp->window, BORDER_WIDTH);
-  XSetWindowBorder(display, cp->window, BORDER_COLOR);
+  CreateDecorations(cp);
 
   XSelectInput(
       display,
@@ -41,32 +39,27 @@ Client* AddClientWindow(Window w, bool isMapped)
   return cp;
 }
 
-void CreateDecorations(Client *client)
+void CreateDecorations(Client* client)
 {
-  XSetWindowAttributes wa = {
-    .override_redirect = True,
-    .event_mask = ExposureMask,
-  };
-  XClassHint ch = {
-    .res_class = "JWM", // TODO: Put in a MACRO
-    .res_name = "decoration",
-  };
-
-  client->window = XCreateWindow(
-      display, root, 10, 10, 10, 10, 0,
-      DefaultDepth(display, screen),
-      CopyFromParent, DefaultVisual(display, screen),
-      CWOverrideRedirect | CWEventMask,
-      &wa
-      );
-
-  XSetClassHint(display, client->window, &ch);
+  XSetWindowBorderWidth(display, client->window, BORDER_WIDTH);
+  XSetWindowBorder(display, client->window, BORDER_COLOR);
 }
 
-void SaveClient(Client *client)
+void SaveClient(Client* client)
 {
   client->next = clients;
   clients = client;
+}
+
+void RemoveClientWindow(Client* client)
+{
+  Client** tc;
+
+  // Remove the right client from the clients list
+  for (tc = &clients; *tc && *tc != client; tc = &(*tc)->next);
+  *tc = client->next;
+
+  free(client);
 }
 
 Client* GetClientFromWindow(Window w)

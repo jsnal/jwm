@@ -2,6 +2,7 @@
 
 static void HandleConfigureRequest(const XConfigureRequestEvent* event);
 static void HandleMapNotify(const XMapRequestEvent* event);
+static void HandleUnmapNotify(const XUnmapEvent* event);
 
 void StartEventListener()
 {
@@ -17,6 +18,9 @@ void StartEventListener()
         break;
       case MapRequest:
         HandleMapNotify(&event.xmaprequest);
+        break;
+      case UnmapNotify:
+        HandleUnmapNotify(&event.xunmap);
         break;
     }
   }
@@ -38,6 +42,15 @@ void HandleConfigureRequest(const XConfigureRequestEvent* event)
 
 void HandleMapNotify(const XMapRequestEvent* event)
 {
-  AddClientWindow(event->window, false);
-  XMapWindow(display, event->window);
+  AddClientWindow(event->window);
+}
+
+void HandleUnmapNotify(const XUnmapEvent* event)
+{
+  Client* cp;
+
+  if ((cp = GetClientFromWindow(event->window)))
+  {
+    RemoveClientWindow(cp);
+  }
 }

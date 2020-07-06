@@ -8,8 +8,8 @@ Display* display;
 Window root;
 int screen;
 
-bool JXCreate();
-void JXStart();
+bool Create();
+void Start();
 int OnXError(Display* display, XErrorEvent* e);
 int OnWMDetected(Display* display, XErrorEvent* e);
 

@@ -2,13 +2,13 @@
 
 int main(int argc, char** argv)
 {
-  if (!JXCreate())
+  if (!Create())
   {
     printf("Failed to init a window manager");
     return 1;
   }
 
-  JXStart();
+  Start();
 
   return 0;
 }

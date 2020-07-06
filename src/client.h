@@ -18,7 +18,9 @@ typedef struct Client {
   struct Client *next;
 } Client;
 
-Client* AddClientWindow(Window w, bool isMapped);
+Client* AddClientWindow(Window w);
+void RemoveClientWindow(Client* client);
+Client* GetClientFromWindow(Window w);
 
 // Master list of all the known clients
 static struct Client *clients = NULL;

@@ -1,9 +1,10 @@
 #include "jwm.h"
 
-Display* display;
-Window root;
+#include <X11/cursorfont.h>
 
-bool JXCreate()
+static Cursor cursor_default;
+
+bool Create()
 {
   display = XOpenDisplay(NULL);
 
@@ -16,10 +17,13 @@ bool JXCreate()
   root = DefaultRootWindow(display);
   screen = DefaultScreen(display);
 
+  cursor_default = XCreateFontCursor(display, XC_left_ptr);
+  XDefineCursor(display, root, cursor_default);
+
   return true;
 }
 
-void JXStart()
+void Start()
 {
   wmFound = false;
   XSetErrorHandler(OnWMDetected);
@@ -55,7 +59,7 @@ void JXStart()
   if (rootReturn != root) return;
 
   for (unsigned int i = 0; i < childrenCount; i++)
-    AddClientWindow(childrenReturn[i], true);
+    AddClientWindow(childrenReturn[i]);
 
   XFree(childrenReturn);
   XUngrabServer(display);
