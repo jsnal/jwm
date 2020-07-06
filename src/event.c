@@ -1,8 +1,11 @@
 #include "event.h"
 
+#include <X11/Xft/Xft.h>
+
 static void HandleConfigureRequest(const XConfigureRequestEvent* event);
 static void HandleMapNotify(const XMapRequestEvent* event);
 static void HandleUnmapNotify(const XUnmapEvent* event);
+static void HandleKeyPress(const XKeyEvent* event);
 
 void StartEventListener()
 {
@@ -21,6 +24,9 @@ void StartEventListener()
         break;
       case UnmapNotify:
         HandleUnmapNotify(&event.xunmap);
+        break;
+      case KeyPress:
+        HandleKeyPress(&event.xkey);
         break;
     }
   }
@@ -52,5 +58,20 @@ void HandleUnmapNotify(const XUnmapEvent* event)
   if ((cp = GetClientFromWindow(event->window)))
   {
     RemoveClientWindow(cp);
+  }
+}
+
+void HandleKeyPress(const XKeyEvent* event)
+{
+  Client* cp;
+
+  if (!(cp = GetClientFromWindow(event->window))) return;
+
+  if ((event->state & Mod1Mask) &&
+      (event->keycode == XKeysymToKeycode(display, XK_Tab))) {
+    cp->width = 400;
+    cp->height = 400;
+
+    ManageApplySize(cp);
   }
 }

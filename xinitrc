@@ -1,2 +1,2 @@
-st &
+xclock &
 exec ./jwm
