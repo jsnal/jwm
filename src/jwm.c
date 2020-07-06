@@ -14,6 +14,7 @@ bool JXCreate()
   }
 
   root = DefaultRootWindow(display);
+  screen = DefaultScreen(display);
 
   return true;
 }

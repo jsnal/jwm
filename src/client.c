@@ -26,7 +26,8 @@ Client* AddClientWindow(Window w, bool isMapped)
   cp->height = attr.height;
   cp->border_width = attr.border_width;
 
-  XSetWindowBorder(display, cp->window, 0);
+  XSetWindowBorderWidth(display, cp->window, BORDER_WIDTH);
+  XSetWindowBorder(display, cp->window, BORDER_COLOR);
 
   XSelectInput(
       display,
@@ -51,6 +52,15 @@ void CreateDecorations(Client *client)
     .res_name = "decoration",
   };
 
+  client->window = XCreateWindow(
+      display, root, 10, 10, 10, 10, 0,
+      DefaultDepth(display, screen),
+      CopyFromParent, DefaultVisual(display, screen),
+      CWOverrideRedirect | CWEventMask,
+      &wa
+      );
+
+  XSetClassHint(display, client->window, &ch);
 }
 
 void SaveClient(Client *client)

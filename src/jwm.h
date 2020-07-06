@@ -4,8 +4,9 @@
 #include "constants.h"
 #include "event.h"
 
-extern Display* display;
-extern Window root;
+Display* display;
+Window root;
+int screen;
 
 bool JXCreate();
 void JXStart();
