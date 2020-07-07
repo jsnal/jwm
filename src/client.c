@@ -5,10 +5,12 @@
 static void SaveClient(Client* client);
 static void CreateDecorations(Client* client);
 static void ManageRaiseFocus(Client* client);
-static void ManageArrange(Client* client);
+static void LayoutTile(Monitor *monitor);
+static void LayoutStack(Monitor *monitor);
 
 unsigned int minWindowWidth = 50;
 unsigned int minWindowHeight = 50;
+unsigned int selmon = 0;
 
 Client* AddClientWindow(Window w)
 {
@@ -28,6 +30,7 @@ Client* AddClientWindow(Window w)
   cp->y = attr.y;
   cp->w  = attr.width;
   cp->h = attr.height;
+  cp->monitor = selmon;
   cp->border_width = attr.border_width;
 
   CreateDecorations(cp);
@@ -84,10 +87,23 @@ void ManageApplySize(Client* client)
 void ManageArrange(Client* client)
 {
   if (!client) return;
-  LayoutTile();
+
+  Monitor* mp = &monitors[client->monitor];
+  switch(mp->layout)
+  {
+    case 0:
+      LayoutTile(mp);
+      break;
+    case 1:
+      LayoutStack(mp);
+      break;
+    default:
+      LayoutTile(mp);
+      break;
+  }
 }
 
-void LayoutTile()
+void LayoutTile(Monitor* monitor)
 {
   Client* cp;
   int i, numClients, atY, slaveH, masterW, masterN;
@@ -99,19 +115,17 @@ void LayoutTile()
   for (cp = clients; cp; cp = cp->next)
     numClients++;
 
-  Screen *currentScreen = ScreenOfDisplay(display, screen);
-
-  masterW = currentScreen->width / 2;
+  masterW = monitor->ww / 2;
   masterN = numClients / 2;
 
   for (cp = clients; cp; cp = cp->next)
   {
     if (numClients == 1)
     {
-      cp->x = 0;
-      cp->y = 0;
-      cp->w = currentScreen->width - (BORDER_WIDTH * 2);
-      cp->h = currentScreen->height - (BORDER_WIDTH * 2);
+      cp->x = monitor->wx;
+      cp->y = monitor->wy;
+      cp->w = monitor->ww - (BORDER_WIDTH * 2);
+      cp->h = monitor->wh - (BORDER_WIDTH * 2);
     }
     else
     {
@@ -120,23 +134,23 @@ void LayoutTile()
 
       if (i < masterN)
       {
-        cp->x = 0;
+        cp->x = monitor->wx;
         cp->w = masterW;
       }
       else
       {
-        cp->x = masterW;
-        cp->w = currentScreen->width - masterW - (BORDER_WIDTH * 2);
+        cp->x = monitor->wx + masterW;
+        cp->w = monitor->ww - masterW - (BORDER_WIDTH * 2);
       }
 
       cp->y = atY;
 
       if (i == numClients - 1 || i == masterN - 1)
-        slaveH = currentScreen->height - atY;
+        slaveH = monitor->wh - atY;
       else if (i < masterN)
-        slaveH = currentScreen->height  / masterN;
+        slaveH = monitor->wh  / masterN;
       else
-        slaveH = currentScreen->height  / (numClients - masterN);
+        slaveH = monitor->wh  / (numClients - masterN);
 
       cp->h = slaveH - (BORDER_WIDTH * 2);
       atY += slaveH;
@@ -144,7 +158,36 @@ void LayoutTile()
     ManageApplySize(cp);
     i++;
   }
+}
 
+void LayoutStack(Monitor* monitor)
+{
+  Client* cp;
+  int i, numClients, atY, slaveH;
+
+  i = 0;
+  numClients = 0;
+  atY = 0;
+
+  for (cp = clients; cp; cp = cp->next)
+    numClients++;
+
+  for (cp = clients; cp; cp = cp->next)
+  {
+    cp->x = monitor->wx;
+    cp->w = monitor->ww - (BORDER_WIDTH * 2);
+
+    if (i == numClients - 1)
+      slaveH = monitor->wh - atY;
+    else
+      slaveH = monitor->wh / numClients;
+
+    cp->y = monitor->wy + atY;
+    cp->h = slaveH - (BORDER_WIDTH * 2);
+    atY += slaveH;
+    ManageApplySize(cp);
+    i++;
+  }
 }
 
 void SaveClient(Client* client)

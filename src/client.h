@@ -7,12 +7,16 @@
 #include <string.h>
 #include <stdlib.h>
 
+typedef enum {
+  Tile, Stack
+} Layouts;
+
 typedef struct Client {
   Window window; // Client window
 
   int x, y;
   int w, h;
-  int m_top, m_bottom, m_left, m_right;
+  int monitor;
   int border_width;
 
   struct Client *next;
@@ -20,6 +24,7 @@ typedef struct Client {
 
 typedef struct Monitor {
   int currentWorkspace;
+  Layouts layout;
 
   int mx, my, mw, mh; // Actual monitor size
   int wx, wy, ww, wh; // Screen size
@@ -29,10 +34,12 @@ Client* AddClientWindow(Window w);
 void RemoveClientWindow(Client* client);
 Client* GetClientFromWindow(Window w);
 void ManageApplySize(Client* client);
+void ManageArrange(Client* client);
 
 // Master list of all the known clients
-struct Client *clients;
-struct Monitor *monitors;
+struct Client* clients;
+Monitor* monitors;
 unsigned int minWindowWidth;
 unsigned int minWindowHeight;
+unsigned int selmon;
 #endif

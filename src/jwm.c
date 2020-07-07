@@ -71,14 +71,39 @@ void Start()
   StartEventListener();
 }
 
+void Destroy()
+{
+  free(clients);
+  free(monitors);
+}
+
 void SetupMonitors()
 {
   XRRMonitorInfo *info;
-  int i, mi, nmon;
+  int nmon;
 
   if (!(info = XRRGetMonitors(display, root, True, &nmon))) return;
 
-  printf("Number of monitors: %d\n", nmon);
+  /* If for whatever reason a monitor isn't detected */
+  if (nmon <= 0 || info == NULL)
+  {
+    monitors = (Monitor*) calloc(1, sizeof(Monitor));
+    monitors[0].wx = monitors[0].mx = 0;
+    monitors[0].wy = monitors[0].my = 0;
+    monitors[0].ww = monitors[0].mw = 1024;
+    monitors[0].wh = monitors[0].mh = 1024;
+    return;
+  }
+
+  monitors = (Monitor*) calloc(nmon, sizeof(Monitor));
+  for (unsigned int i = 0; i < nmon; i++)
+  {
+    monitors[i].wx = monitors[i].mx = info[i].x;
+    monitors[i].wy = monitors[i].my = info[i].y;
+    monitors[i].ww = monitors[i].mw = info[i].width;
+    monitors[i].wh = monitors[i].mh = info[i].height;
+    monitors[i].layout = Stack;
+  }
 }
 
 int OnXError(Display* display, XErrorEvent* e)

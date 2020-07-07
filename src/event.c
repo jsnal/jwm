@@ -69,9 +69,6 @@ void HandleKeyPress(const XKeyEvent* event)
 
   if ((event->state & Mod1Mask) &&
       (event->keycode == XKeysymToKeycode(display, XK_Tab))) {
-    cp->w = 400;
-    cp->h = 400;
-
-    ManageApplySize(cp);
+    ManageArrange(cp);
   }
 }
