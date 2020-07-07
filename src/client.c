@@ -7,6 +7,9 @@ static void CreateDecorations(Client* client);
 static void ManageRaiseFocus(Client* client);
 static void ManageArrange(Client* client);
 
+unsigned int minWindowWidth = 50;
+unsigned int minWindowHeight = 50;
+
 Client* AddClientWindow(Window w)
 {
   XWindowAttributes attr;
@@ -23,8 +26,8 @@ Client* AddClientWindow(Window w)
 
   cp->x = attr.x;
   cp->y = attr.y;
-  cp->width  = attr.width;
-  cp->height = attr.height;
+  cp->w  = attr.width;
+  cp->h = attr.height;
   cp->border_width = attr.border_width;
 
   CreateDecorations(cp);
@@ -72,10 +75,10 @@ void ManageApplySize(Client* client)
 {
   if (!client) return;
 
-  client->width = client->width < minWindowWidth ? minWindowWidth : client->width;
-  client->height = client->height < minWindowHeight ? minWindowHeight : client->height;
+  client->w = client->w < minWindowWidth ? minWindowWidth : client->w;
+  client->h = client->h < minWindowHeight ? minWindowHeight : client->h;
 
-  XMoveResizeWindow(display, client->window, client->x, client->y, client->width, client->height);
+  XMoveResizeWindow(display, client->window, client->x, client->y, client->w, client->h);
 }
 
 void ManageArrange(Client* client)
@@ -107,8 +110,8 @@ void LayoutTile()
     {
       cp->x = 0;
       cp->y = 0;
-      cp->width = currentScreen->width - (BORDER_WIDTH * 2);
-      cp->height = currentScreen->height - (BORDER_WIDTH * 2);
+      cp->w = currentScreen->width - (BORDER_WIDTH * 2);
+      cp->h = currentScreen->height - (BORDER_WIDTH * 2);
     }
     else
     {
@@ -118,12 +121,12 @@ void LayoutTile()
       if (i < masterN)
       {
         cp->x = 0;
-        cp->width = masterW;
+        cp->w = masterW;
       }
       else
       {
         cp->x = masterW;
-        cp->width = currentScreen->width - masterW - (BORDER_WIDTH * 2);
+        cp->w = currentScreen->width - masterW - (BORDER_WIDTH * 2);
       }
 
       cp->y = atY;
@@ -131,11 +134,11 @@ void LayoutTile()
       if (i == numClients - 1 || i == masterN - 1)
         slaveH = currentScreen->height - atY;
       else if (i < masterN)
-        slaveH = currentScreen->height / masterN;
+        slaveH = currentScreen->height  / masterN;
       else
-        slaveH = currentScreen->height / (numClients - masterN);
+        slaveH = currentScreen->height  / (numClients - masterN);
 
-      cp->height = slaveH - (BORDER_WIDTH * 2);
+      cp->h = slaveH - (BORDER_WIDTH * 2);
       atY += slaveH;
     }
     ManageApplySize(cp);

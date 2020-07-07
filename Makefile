@@ -1,6 +1,6 @@
 CC = gcc
 
-LIBS = -lX11 -lstdc++
+LIBS = -lX11 -lstdc++ -lXrandr
 INCLUDES = -I/usr/include/freetype2
 CFLAGS = -I. -Wall $(LIBS) $(INCLUDES)
 

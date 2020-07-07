@@ -1,7 +1,9 @@
 #include "jwm.h"
 
 #include <X11/cursorfont.h>
+#include <X11/extensions/Xrandr.h>
 
+static void SetupMonitors();
 static Cursor cursor_default;
 
 bool Create()
@@ -16,6 +18,8 @@ bool Create()
 
   root = DefaultRootWindow(display);
   screen = DefaultScreen(display);
+
+  SetupMonitors();
 
   cursor_default = XCreateFontCursor(display, XC_left_ptr);
   XDefineCursor(display, root, cursor_default);
@@ -65,6 +69,16 @@ void Start()
   XUngrabServer(display);
 
   StartEventListener();
+}
+
+void SetupMonitors()
+{
+  XRRMonitorInfo *info;
+  int i, mi, nmon;
+
+  if (!(info = XRRGetMonitors(display, root, True, &nmon))) return;
+
+  printf("Number of monitors: %d\n", nmon);
 }
 
 int OnXError(Display* display, XErrorEvent* e)
