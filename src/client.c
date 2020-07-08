@@ -34,6 +34,7 @@ Client* AddClientWindow(Window w)
   cp->h = attr.height;
   cp->monitor = selmon;
   cp->border_width = attr.border_width;
+  cp->fullscreen = false;
 
   CreateDecorations(cp);
 
@@ -75,6 +76,15 @@ Client* AddClientWindow(Window w)
       GrabModeAsync,
       GrabModeAsync);
 
+  XGrabKey(
+      display,
+      XKeysymToKeycode(display, XK_f),
+      Mod1Mask,
+      cp->window,
+      false,
+      GrabModeAsync,
+      GrabModeAsync);
+
   return cp;
 }
 
@@ -86,10 +96,16 @@ void CreateDecorations(Client* client)
   XSetWindowBorder(display, client->window, FOCUS_BORDER_COLOR);
 }
 
+void RemoveDecorations(Client* client)
+{
+  XSetWindowBorderWidth(display, client->window, UNFOCUS_BORDER_WIDTH);
+  XSetWindowBorder(display, client->window, UNFOCUS_BORDER_COLOR);
+}
+
 void ManageInputFocus(Client* client)
 {
   XSetInputFocus(display, client->window, RevertToParent, CurrentTime);
-  XSetWindowBorder(display, client->window, FOCUS_BORDER_COLOR);
+  CreateDecorations(client);
 }
 
 void ManageFocus(Client* client)
@@ -105,12 +121,6 @@ void ManageFocus(Client* client)
   ManageInputFocus(client);
 }
 
-void ManageUnfocus(Client* client)
-{
-  XSetWindowBorder(display, client->window, UNFOCUS_BORDER_COLOR);
-  XSetWindowBorder(display, client->window, UNFOCUS_BORDER_WIDTH);
-}
-
 void ManageApplySize(Client* client)
 {
   if (!client) return;
@@ -119,6 +129,52 @@ void ManageApplySize(Client* client)
   client->h = client->h < minWindowHeight ? minWindowHeight : client->h;
 
   XMoveResizeWindow(display, client->window, client->x, client->y, client->w, client->h);
+}
+
+void ManageFullscreen(Client* client)
+{
+  Monitor* mp;
+
+  if (!client->fullscreen)
+  {
+    if (!(mp = &monitors[client->monitor]));
+
+    client->fullscreen = true;
+
+    client->old_y = client->y;
+    client->old_x = client->x;
+    client->old_w = client->w;
+    client->old_h = client->h;
+
+    client->y = mp->my;
+    client->x = mp->mx;
+    client->w = mp->mw;
+    client->h = mp->mh;
+
+    RemoveDecorations(client);
+    ManageApplySize(client);
+  }
+}
+
+void ManageUnfullscreen(Client* client)
+{
+  Monitor* mp;
+
+  if (client->fullscreen)
+  {
+    if (!(mp = &monitors[client->monitor]));
+
+    client->fullscreen = false;
+
+    client->y = client->old_y;
+    client->x = client->old_x;
+    client->w = client->old_w;
+    client->h = client->old_h;
+
+    ManageApplySize(client);
+    CreateDecorations(client);
+    ManageArrange(client);
+  }
 }
 
 void ManageArrange(Client* client)
@@ -157,7 +213,7 @@ void LayoutTile(Monitor* monitor)
 
   for (cp = clients; cp; cp = cp->next)
   {
-    if (IsClientOnMonitor(cp, monitor))
+    if (IsClientOnMonitor(cp, monitor) && !cp->fullscreen)
     {
       if (numClients == 1)
       {
@@ -214,7 +270,7 @@ void LayoutStack(Monitor* monitor)
 
   for (cp = clients; cp; cp = cp->next)
   {
-    if (IsClientOnMonitor(cp, monitor))
+    if (IsClientOnMonitor(cp, monitor) && !cp->fullscreen)
     {
       cp->x = monitor->wx;
       cp->w = monitor->ww - (FOCUS_BORDER_WIDTH * 2);
@@ -272,7 +328,7 @@ Client* GetClientFromWindow(Window w)
  * you input -1, you will step backwards one item. This code is heavily inpirsed
  * by dwm's single linked list traverser.
  */
-void FocusClientWindow(int d)
+void IOFocusClientWindow(int d)
 {
   Client* cp = NULL, *icp = NULL;
   Monitor* mp;
@@ -300,4 +356,16 @@ void FocusClientWindow(int d)
   {
     ManageFocus(cp);
   }
+}
+
+void IOToggleFullscreen()
+{
+  Client* cp;
+
+  if (!(cp = monitors[selmon].focused)) return;
+
+  if (cp->fullscreen)
+    ManageUnfullscreen(cp);
+  else
+    ManageFullscreen(cp);
 }

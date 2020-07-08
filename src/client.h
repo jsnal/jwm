@@ -14,10 +14,13 @@ typedef enum {
 typedef struct Client {
   Window window; // Client window
 
-  int x, y;
-  int w, h;
+  int x, y, w, h;
+  int old_x, old_y, old_w, old_h;
   int monitor;
   int border_width;
+
+  bool fullscreen;
+  bool floating;
 
   struct Client *next;
 } Client;
@@ -30,21 +33,22 @@ typedef struct Monitor {
   int wx, wy, ww, wh; // Screen size
 
   struct Client* focused;
-  struct Client* previous;
 } Monitor;
 
 Client* AddClientWindow(Window w);
 void RemoveClientWindow(Client* client);
 Client* GetClientFromWindow(Window w);
-void FocusClientWindow(int d);
+void RemoveDecorations(Client* client);
 void ManageFocus(Client* client);
 void ManageInputFocus(Client* client);
-void ManageUnfocus(Client* client);
 void ManageApplySize(Client* client);
 void ManageArrange(Client* client);
 
+void IOFocusClientWindow(int d);
+void IOToggleFullscreen();
+
 // Master list of all the known clients
-struct Client* clients;
+Client* clients;
 Monitor* monitors;
 unsigned int minWindowWidth;
 unsigned int minWindowHeight;

@@ -84,12 +84,17 @@ void HandleKeyPress(const XKeyEvent* event)
   else if ((event->state & Mod1Mask) &&
            (event->keycode == XKeysymToKeycode(display, XK_j)))
   {
-    FocusClientWindow(1);
+    IOFocusClientWindow(1);
   }
   else if ((event->state & Mod1Mask) &&
            (event->keycode == XKeysymToKeycode(display, XK_k)))
   {
-    FocusClientWindow(-1);
+    IOFocusClientWindow(-1);
+  }
+  else if ((event->state & Mod1Mask) &&
+           (event->keycode == XKeysymToKeycode(display, XK_f)))
+  {
+    IOToggleFullscreen();
   }
 }
 
@@ -98,10 +103,9 @@ void HandleFocusIn(const XFocusInEvent* event)
   Client* cp;
 
   if (!(cp = GetClientFromWindow(event->window))) return;
-  ManageFocus(cp);
 
-  printf("%ld\n", cp->window);
-  printf("%ld\n", monitors[cp->monitor].focused->window);
+  if (!cp->fullscreen)
+    ManageFocus(cp);
 }
 
 void HandleFocusOut(const XFocusOutEvent* event)
@@ -109,5 +113,5 @@ void HandleFocusOut(const XFocusOutEvent* event)
   Client* cp;
 
   if (!(cp = GetClientFromWindow(event->window))) return;
-  ManageUnfocus(cp);
+  RemoveDecorations(cp);
 }
