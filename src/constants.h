@@ -6,8 +6,10 @@
 #include <stdbool.h>
 
 /* Framing Constants */
-#define BORDER_WIDTH 2
-#define BORDER_COLOR 0xcc0000
+#define FOCUS_BORDER_WIDTH 2
+#define FOCUS_BORDER_COLOR 0xcc0000
+#define UNFOCUS_BORDER_WIDTH 0
+#define UNFOCUS_BORDER_COLOR 0x0000cc
 #define BACKGROUND_COLOR 0x0000ff
 
 #endif

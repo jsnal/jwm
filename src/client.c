@@ -4,12 +4,14 @@
 
 static void SaveClient(Client* client);
 static void CreateDecorations(Client* client);
-static void ManageRaiseFocus(Client* client);
+static bool IsClientOnMonitor(Client* client, Monitor* monitor);
 static void LayoutTile(Monitor *monitor);
 static void LayoutStack(Monitor *monitor);
 
 unsigned int minWindowWidth = 50;
 unsigned int minWindowHeight = 50;
+
+// TODO: Make selecte monitor dynamic based on what monitor the current cient is on.
 unsigned int selmon = 0;
 
 Client* AddClientWindow(Window w)
@@ -38,17 +40,35 @@ Client* AddClientWindow(Window w)
   XSelectInput(
       display,
       cp->window,
-      SubstructureRedirectMask | SubstructureNotifyMask);
+      FocusChangeMask);
 
   SaveClient(cp);
   XMapWindow(display, cp->window);
 
-  ManageRaiseFocus(cp);
+  ManageFocus(cp);
   ManageArrange(cp);
 
   XGrabKey(
       display,
       XKeysymToKeycode(display, XK_Tab),
+      Mod1Mask,
+      cp->window,
+      false,
+      GrabModeAsync,
+      GrabModeAsync);
+
+  XGrabKey(
+      display,
+      XKeysymToKeycode(display, XK_j),
+      Mod1Mask,
+      cp->window,
+      false,
+      GrabModeAsync,
+      GrabModeAsync);
+
+  XGrabKey(
+      display,
+      XKeysymToKeycode(display, XK_k),
       Mod1Mask,
       cp->window,
       false,
@@ -62,16 +82,33 @@ void CreateDecorations(Client* client)
 {
   if (!client) return;
 
-  XSetWindowBorderWidth(display, client->window, BORDER_WIDTH);
-  XSetWindowBorder(display, client->window, BORDER_COLOR);
+  XSetWindowBorderWidth(display, client->window, FOCUS_BORDER_WIDTH);
+  XSetWindowBorder(display, client->window, FOCUS_BORDER_COLOR);
 }
 
-void ManageRaiseFocus(Client* client)
+void ManageInputFocus(Client* client)
+{
+  XSetInputFocus(display, client->window, RevertToParent, CurrentTime);
+  XSetWindowBorder(display, client->window, FOCUS_BORDER_COLOR);
+}
+
+void ManageFocus(Client* client)
 {
   if (!client) return;
 
+  printf("running manage focus\n");
+
+  // Save the current focused window and the previous focued window;
+  monitors[client->monitor].focused = client;
+
   XRaiseWindow(display, client->window);
-  XSetInputFocus(display, client->window, RevertToParent, CurrentTime);
+  ManageInputFocus(client);
+}
+
+void ManageUnfocus(Client* client)
+{
+  XSetWindowBorder(display, client->window, UNFOCUS_BORDER_COLOR);
+  XSetWindowBorder(display, client->window, UNFOCUS_BORDER_WIDTH);
 }
 
 void ManageApplySize(Client* client)
@@ -120,43 +157,46 @@ void LayoutTile(Monitor* monitor)
 
   for (cp = clients; cp; cp = cp->next)
   {
-    if (numClients == 1)
+    if (IsClientOnMonitor(cp, monitor))
     {
-      cp->x = monitor->wx;
-      cp->y = monitor->wy;
-      cp->w = monitor->ww - (BORDER_WIDTH * 2);
-      cp->h = monitor->wh - (BORDER_WIDTH * 2);
-    }
-    else
-    {
-      if (i == masterN)
-        atY = 0;
-
-      if (i < masterN)
+      if (numClients == 1)
       {
         cp->x = monitor->wx;
-        cp->w = masterW;
+        cp->y = monitor->wy;
+        cp->w = monitor->ww - (FOCUS_BORDER_WIDTH * 2);
+        cp->h = monitor->wh - (FOCUS_BORDER_WIDTH * 2);
       }
       else
       {
-        cp->x = monitor->wx + masterW;
-        cp->w = monitor->ww - masterW - (BORDER_WIDTH * 2);
+        if (i == masterN)
+          atY = 0;
+
+        if (i < masterN)
+        {
+          cp->x = monitor->wx;
+          cp->w = masterW;
+        }
+        else
+        {
+          cp->x = monitor->wx + masterW;
+          cp->w = monitor->ww - masterW - (FOCUS_BORDER_WIDTH * 2);
+        }
+
+        cp->y = atY;
+
+        if (i == numClients - 1 || i == masterN - 1)
+          slaveH = monitor->wh - atY;
+        else if (i < masterN)
+          slaveH = monitor->wh  / masterN;
+        else
+          slaveH = monitor->wh  / (numClients - masterN);
+
+        cp->h = slaveH - (FOCUS_BORDER_WIDTH * 2);
+        atY += slaveH;
       }
-
-      cp->y = atY;
-
-      if (i == numClients - 1 || i == masterN - 1)
-        slaveH = monitor->wh - atY;
-      else if (i < masterN)
-        slaveH = monitor->wh  / masterN;
-      else
-        slaveH = monitor->wh  / (numClients - masterN);
-
-      cp->h = slaveH - (BORDER_WIDTH * 2);
-      atY += slaveH;
+      ManageApplySize(cp);
+      i++;
     }
-    ManageApplySize(cp);
-    i++;
   }
 }
 
@@ -174,20 +214,28 @@ void LayoutStack(Monitor* monitor)
 
   for (cp = clients; cp; cp = cp->next)
   {
-    cp->x = monitor->wx;
-    cp->w = monitor->ww - (BORDER_WIDTH * 2);
+    if (IsClientOnMonitor(cp, monitor))
+    {
+      cp->x = monitor->wx;
+      cp->w = monitor->ww - (FOCUS_BORDER_WIDTH * 2);
 
-    if (i == numClients - 1)
-      slaveH = monitor->wh - atY;
-    else
-      slaveH = monitor->wh / numClients;
+      if (i == numClients - 1)
+        slaveH = monitor->wh - atY;
+      else
+        slaveH = monitor->wh / numClients;
 
-    cp->y = monitor->wy + atY;
-    cp->h = slaveH - (BORDER_WIDTH * 2);
-    atY += slaveH;
-    ManageApplySize(cp);
-    i++;
+      cp->y = monitor->wy + atY;
+      cp->h = slaveH - (FOCUS_BORDER_WIDTH * 2);
+      atY += slaveH;
+      ManageApplySize(cp);
+      i++;
+    }
   }
+}
+
+bool IsClientOnMonitor(Client* client, Monitor* monitor)
+{
+  return monitor == &monitors[client->monitor];
 }
 
 void SaveClient(Client* client)
@@ -216,4 +264,40 @@ Client* GetClientFromWindow(Window w)
       return cp;
 
   return NULL;
+}
+
+/*
+ * Change the focus of the client window based on where you are in the clients
+ * linked list. If you input 1, you will step foward one item in the list. If
+ * you input -1, you will step backwards one item. This code is heavily inpirsed
+ * by dwm's single linked list traverser.
+ */
+void FocusClientWindow(int d)
+{
+  Client* cp = NULL, *icp = NULL;
+  Monitor* mp;
+
+  if (!(mp = &monitors[selmon])) return;
+
+  if (d > 0)
+  {
+    for (cp = mp->focused->next; cp && !IsClientOnMonitor(cp, mp); cp = cp->next);
+    if (!cp)
+      for (cp = clients; cp && !IsClientOnMonitor(cp, mp); cp = cp->next);
+  }
+  else
+  {
+    for (icp = clients; icp != mp->focused; icp = icp->next)
+      if (IsClientOnMonitor(icp, mp))
+        cp = icp;
+    if (!cp)
+      for (; icp; icp = icp->next)
+        if (IsClientOnMonitor(icp, mp))
+          cp = icp;
+  }
+
+  if (cp)
+  {
+    ManageFocus(cp);
+  }
 }

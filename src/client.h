@@ -28,11 +28,18 @@ typedef struct Monitor {
 
   int mx, my, mw, mh; // Actual monitor size
   int wx, wy, ww, wh; // Screen size
+
+  struct Client* focused;
+  struct Client* previous;
 } Monitor;
 
 Client* AddClientWindow(Window w);
 void RemoveClientWindow(Client* client);
 Client* GetClientFromWindow(Window w);
+void FocusClientWindow(int d);
+void ManageFocus(Client* client);
+void ManageInputFocus(Client* client);
+void ManageUnfocus(Client* client);
 void ManageApplySize(Client* client);
 void ManageArrange(Client* client);
 

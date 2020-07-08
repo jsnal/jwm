@@ -62,6 +62,11 @@ void Start()
 
   if (rootReturn != root) return;
 
+  XSelectInput(
+      display,
+      root,
+      SubstructureRedirectMask | SubstructureNotifyMask);
+
   for (unsigned int i = 0; i < childrenCount; i++)
     AddClientWindow(childrenReturn[i]);
 
@@ -102,7 +107,7 @@ void SetupMonitors()
     monitors[i].wy = monitors[i].my = info[i].y;
     monitors[i].ww = monitors[i].mw = info[i].width;
     monitors[i].wh = monitors[i].mh = info[i].height;
-    monitors[i].layout = Stack;
+    monitors[i].layout = Tile;
   }
 }
 

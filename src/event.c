@@ -6,6 +6,8 @@ static void HandleConfigureRequest(const XConfigureRequestEvent* event);
 static void HandleMapNotify(const XMapRequestEvent* event);
 static void HandleUnmapNotify(const XUnmapEvent* event);
 static void HandleKeyPress(const XKeyEvent* event);
+static void HandleFocusIn(const XFocusInEvent* event);
+static void HandleFocusOut(const XFocusOutEvent* event);
 
 void StartEventListener()
 {
@@ -18,6 +20,12 @@ void StartEventListener()
     switch(event.type) {
       case ConfigureRequest:
         HandleConfigureRequest(&event.xconfigurerequest);
+        break;
+      case FocusIn:
+        HandleFocusIn(&event.xfocus);
+        break;
+      case FocusOut:
+        HandleFocusOut(&event.xfocus);
         break;
       case MapRequest:
         HandleMapNotify(&event.xmaprequest);
@@ -58,6 +66,7 @@ void HandleUnmapNotify(const XUnmapEvent* event)
   if ((cp = GetClientFromWindow(event->window)))
   {
     RemoveClientWindow(cp);
+    ManageInputFocus(cp->next);
   }
 }
 
@@ -68,7 +77,37 @@ void HandleKeyPress(const XKeyEvent* event)
   if (!(cp = GetClientFromWindow(event->window))) return;
 
   if ((event->state & Mod1Mask) &&
-      (event->keycode == XKeysymToKeycode(display, XK_Tab))) {
+      (event->keycode == XKeysymToKeycode(display, XK_Tab)))
+  {
     ManageArrange(cp);
   }
+  else if ((event->state & Mod1Mask) &&
+           (event->keycode == XKeysymToKeycode(display, XK_j)))
+  {
+    FocusClientWindow(1);
+  }
+  else if ((event->state & Mod1Mask) &&
+           (event->keycode == XKeysymToKeycode(display, XK_k)))
+  {
+    FocusClientWindow(-1);
+  }
+}
+
+void HandleFocusIn(const XFocusInEvent* event)
+{
+  Client* cp;
+
+  if (!(cp = GetClientFromWindow(event->window))) return;
+  ManageFocus(cp);
+
+  printf("%ld\n", cp->window);
+  printf("%ld\n", monitors[cp->monitor].focused->window);
+}
+
+void HandleFocusOut(const XFocusOutEvent* event)
+{
+  Client* cp;
+
+  if (!(cp = GetClientFromWindow(event->window))) return;
+  ManageUnfocus(cp);
 }
