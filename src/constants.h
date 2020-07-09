@@ -5,6 +5,14 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#ifndef DEBUG
+#define D if (true)
+#else
+#define D if (false)
+#endif
+
+#define __WM_NAME__  "JWM"
+
 /* Framing Constants */
 #define FOCUS_BORDER_WIDTH 2
 #define FOCUS_BORDER_COLOR 0xcc0000

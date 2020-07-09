@@ -6,6 +6,9 @@ CFLAGS = -I. -Wall $(LIBS) $(INCLUDES)
 
 all: jwm
 
+release: CFLAGS += -DDEBUG -g
+release: jwm
+
 HEADER = \
 		src/jwm.h \
 		src/client.h \

@@ -12,7 +12,8 @@ bool Create()
 
   if (display == NULL)
   {
-    printf("Failed to open X display%s\n", XDisplayName(NULL));
+    fprintf(stderr, __WM_NAME__": Failed to open X display%s\n",
+            XDisplayName(NULL));
     return false;
   }
 
@@ -39,7 +40,7 @@ void Start()
 
   if (wmFound)
   {
-    printf("Detected another window manager on display%s\n",
+    fprintf(stderr, __WM_NAME__": Detected another window manager on display%s\n",
            XDisplayString(display));
     return;
   }
@@ -116,10 +117,10 @@ int OnXError(Display* display, XErrorEvent* e)
   const int MAX_ERROR_TEXT_LENGTH = 1024;
   char error_text[MAX_ERROR_TEXT_LENGTH];
   XGetErrorText(display, e->error_code, error_text, sizeof(error_text));
-  printf("Received X error:\n");
-  printf("\tRequest: %d - %d\n", (int)e->request_code, e->request_code);
-  printf("\tError Code: %d - %s\n", (int)e->error_code, error_text);
-  printf("\tResource ID: %ld\n", e->resourceid);
+  fprintf(stderr, __WM_NAME__": Received X error:\n");
+  fprintf(stderr, "\tRequest: %d - %d\n", (int)e->request_code, e->request_code);
+  fprintf(stderr, "\tError Code: %d - %s\n", (int)e->error_code, error_text);
+  fprintf(stderr, "\tResource ID: %ld\n", e->resourceid);
   return 0;
 }
 
