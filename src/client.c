@@ -1,7 +1,5 @@
 #include "client.h"
 
-#include <X11/Xft/Xft.h>
-
 static void SaveClient(Client* client);
 static void CreateDecorations(Client* client);
 static bool IsClientOnMonitor(Client* client, Monitor* monitor);
@@ -36,7 +34,7 @@ Client* AddClientWindow(Window w)
   cp->border_width = attr.border_width;
   cp->fullscreen = false;
 
-  CreateDecorations(cp);
+  /* CreateDecorations(cp); */
 
   XSelectInput(
       display,
@@ -46,8 +44,8 @@ Client* AddClientWindow(Window w)
   SaveClient(cp);
   XMapWindow(display, cp->window);
 
-  ManageFocus(cp);
   ManageArrange(cp);
+  ManageFocus(cp);
 
   XGrabKey(
       display,
@@ -84,6 +82,9 @@ Client* AddClientWindow(Window w)
       false,
       GrabModeAsync,
       GrabModeAsync);
+
+  D fprintf(stderr, __WM_NAME__": Client window added: %ld\n",
+            cp->window);
 
   return cp;
 }
@@ -137,7 +138,7 @@ void ManageFullscreen(Client* client)
 
   if (!client->fullscreen)
   {
-    if (!(mp = &monitors[client->monitor]));
+    if (!(mp = &monitors[client->monitor])) return;
 
     client->fullscreen = true;
 
@@ -162,7 +163,7 @@ void ManageUnfullscreen(Client* client)
 
   if (client->fullscreen)
   {
-    if (!(mp = &monitors[client->monitor]));
+    if (!(mp = &monitors[client->monitor])) return;
 
     client->fullscreen = false;
 
@@ -172,8 +173,8 @@ void ManageUnfullscreen(Client* client)
     client->h = client->old_h;
 
     ManageApplySize(client);
-    CreateDecorations(client);
     ManageArrange(client);
+    CreateDecorations(client);
   }
 }
 

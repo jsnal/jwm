@@ -10,16 +10,17 @@ release: CFLAGS += -DDEBUG -g
 release: jwm
 
 HEADER = \
-		src/jwm.h \
-		src/client.h \
-		src/event.h \
-		src/jwm_constants.h
+	 src/jwm.h \
+	 src/client.h \
+	 src/event.h \
+	 src/jwm_constants.h \
+	 src/config.h
 
 SOURCES = \
-		src/jwm.c \
-		src/client.c \
-		src/event.c \
-		src/main.c
+	 src/jwm.c \
+	 src/client.c \
+	 src/event.c \
+	 src/main.c
 
 EXECUTABLE = $(OUTPUTS:%=$(BIN)/%)
 OBJECTS = $(SOURCES:.c=.o)

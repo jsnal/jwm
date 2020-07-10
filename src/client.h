@@ -35,6 +35,20 @@ typedef struct Monitor {
   struct Client* focused;
 } Monitor;
 
+typedef union Arg {
+  int i;
+  unsigned int ui;
+  float f;
+  const void *v;
+} Arg;
+
+typedef struct Key {
+  unsigned int mod;
+  KeySym keysym;
+  void (*func)(const Arg *);
+  const Arg arg;
+} Key;
+
 Client* AddClientWindow(Window w);
 void RemoveClientWindow(Client* client);
 Client* GetClientFromWindow(Window w);

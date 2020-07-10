@@ -56,7 +56,13 @@ void HandleConfigureRequest(const XConfigureRequestEvent* event)
 
 void HandleMapNotify(const XMapRequestEvent* event)
 {
-  AddClientWindow(event->window);
+  Client* cp;
+  if (!(cp = AddClientWindow(event->window)))
+  {
+    D fprintf(stderr, __WM_NAME__": Failed to map window\n");
+    return;
+  }
+  ManageInputFocus(cp);
 }
 
 void HandleUnmapNotify(const XUnmapEvent* event)
@@ -100,6 +106,8 @@ void HandleKeyPress(const XKeyEvent* event)
 
 void HandleFocusIn(const XFocusInEvent* event)
 {
+  D fprintf(stderr, __WM_NAME__": Window going in focus: %ld\n",
+            event->window);
   Client* cp;
 
   if (!(cp = GetClientFromWindow(event->window))) return;
@@ -111,6 +119,9 @@ void HandleFocusIn(const XFocusInEvent* event)
 void HandleFocusOut(const XFocusOutEvent* event)
 {
   Client* cp;
+
+  D fprintf(stderr, __WM_NAME__": Window going out of focus: %ld\n",
+            event->window);
 
   if (!(cp = GetClientFromWindow(event->window))) return;
   RemoveDecorations(cp);

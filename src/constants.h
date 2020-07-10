@@ -2,6 +2,7 @@
 #define JWM_CONSTANTS_HH
 
 #include <X11/Xlib.h>
+#include <X11/Xft/Xft.h>
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -12,6 +13,7 @@
 #endif
 
 #define __WM_NAME__  "JWM"
+#define LENGTH(x) (sizeof X / sizeof X[0])
 
 /* Framing Constants */
 #define FOCUS_BORDER_WIDTH 2
