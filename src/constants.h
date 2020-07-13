@@ -13,7 +13,7 @@
 #endif
 
 #define __WM_NAME__  "JWM"
-#define LENGTH(x) (sizeof X / sizeof X[0])
+#define LENGTH(X) (sizeof X / sizeof X[0])
 
 /* Framing Constants */
 #define FOCUS_BORDER_WIDTH 2

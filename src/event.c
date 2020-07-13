@@ -1,4 +1,5 @@
 #include "event.h"
+#include "config.h"
 
 #include <X11/Xft/Xft.h>
 
@@ -63,6 +64,7 @@ void HandleMapNotify(const XMapRequestEvent* event)
     return;
   }
   ManageInputFocus(cp);
+  ManageGrabKeys(cp);
 }
 
 void HandleUnmapNotify(const XUnmapEvent* event)
@@ -82,26 +84,39 @@ void HandleKeyPress(const XKeyEvent* event)
 
   if (!(cp = GetClientFromWindow(event->window))) return;
 
-  if ((event->state & Mod1Mask) &&
-      (event->keycode == XKeysymToKeycode(display, XK_Tab)))
-  {
-    ManageArrange(cp);
+  KeySym keysym;
+  keysym = XKeysymToKeycode(display, (KeyCode) event->keycode);
+  fprintf(stderr, "Keycode %ld\n", keysym);
+
+  for (unsigned int i = 0; i < LENGTH(keys); i++) {
+
+    fprintf(stderr, "Keycode %ld\n", keys[i].keysym);
+    if (keysym == keys[i].keysym && keys[i].func && (event->state & keys[i].mod)) {
+      fprintf(stderr, "Keycode %ld\n", keys[i].keysym);
+      keys[i].func(&(keys[i].arg));
+    }
   }
-  else if ((event->state & Mod1Mask) &&
-           (event->keycode == XKeysymToKeycode(display, XK_j)))
-  {
-    IOFocusClientWindow(1);
-  }
-  else if ((event->state & Mod1Mask) &&
-           (event->keycode == XKeysymToKeycode(display, XK_k)))
-  {
-    IOFocusClientWindow(-1);
-  }
-  else if ((event->state & Mod1Mask) &&
-           (event->keycode == XKeysymToKeycode(display, XK_f)))
-  {
-    IOToggleFullscreen();
-  }
+
+  /* if ((event->state & Mod1Mask) && */
+  /*     (event->keycode == XKeysymToKeycode(display, XK_Tab))) */
+  /* { */
+  /*   ManageArrange(cp); */
+  /* } */
+  /* else if ((event->state & Mod1Mask) && */
+  /*          (event->keycode == XKeysymToKeycode(display, XK_j))) */
+  /* { */
+  /*   IOFocusClientWindow(1); */
+  /* } */
+  /* else if ((event->state & Mod1Mask) && */
+  /*          (event->keycode == XKeysymToKeycode(display, XK_k))) */
+  /* { */
+  /*   IOFocusClientWindow(-1); */
+  /* } */
+  /* else if ((event->state & Mod1Mask) && */
+  /*          (event->keycode == XKeysymToKeycode(display, XK_f))) */
+  /* { */
+  /*   IOToggleFullscreen(); */
+  /* } */
 }
 
 void HandleFocusIn(const XFocusInEvent* event)

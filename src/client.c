@@ -1,4 +1,5 @@
 #include "client.h"
+#include "config.h"
 
 static void SaveClient(Client* client);
 static void CreateDecorations(Client* client);
@@ -47,41 +48,41 @@ Client* AddClientWindow(Window w)
   ManageArrange(cp);
   ManageFocus(cp);
 
-  XGrabKey(
-      display,
-      XKeysymToKeycode(display, XK_Tab),
-      Mod1Mask,
-      cp->window,
-      false,
-      GrabModeAsync,
-      GrabModeAsync);
-
-  XGrabKey(
-      display,
-      XKeysymToKeycode(display, XK_j),
-      Mod1Mask,
-      cp->window,
-      false,
-      GrabModeAsync,
-      GrabModeAsync);
-
-  XGrabKey(
-      display,
-      XKeysymToKeycode(display, XK_k),
-      Mod1Mask,
-      cp->window,
-      false,
-      GrabModeAsync,
-      GrabModeAsync);
-
-  XGrabKey(
-      display,
-      XKeysymToKeycode(display, XK_f),
-      Mod1Mask,
-      cp->window,
-      false,
-      GrabModeAsync,
-      GrabModeAsync);
+  /* XGrabKey( */
+  /*     display, */
+  /*     XKeysymToKeycode(display, XK_Tab), */
+  /*     Mod1Mask, */
+  /*     cp->window, */
+  /*     false, */
+  /*     GrabModeAsync, */
+  /*     GrabModeAsync); */
+  /*  */
+  /* XGrabKey( */
+  /*     display, */
+  /*     XKeysymToKeycode(display, XK_j), */
+  /*     Mod1Mask, */
+  /*     cp->window, */
+  /*     false, */
+  /*     GrabModeAsync, */
+  /*     GrabModeAsync); */
+  /*  */
+  /* XGrabKey( */
+  /*     display, */
+  /*     XKeysymToKeycode(display, XK_k), */
+  /*     Mod1Mask, */
+  /*     cp->window, */
+  /*     false, */
+  /*     GrabModeAsync, */
+  /*     GrabModeAsync); */
+  /*  */
+  /* XGrabKey( */
+  /*     display, */
+  /*     XKeysymToKeycode(display, XK_f), */
+  /*     Mod1Mask, */
+  /*     cp->window, */
+  /*     false, */
+  /*     GrabModeAsync, */
+  /*     GrabModeAsync); */
 
   D fprintf(stderr, __WM_NAME__": Client window added: %ld\n",
             cp->window);
@@ -195,6 +196,19 @@ void ManageArrange(Client* client)
       LayoutTile(mp);
       break;
   }
+}
+
+void ManageGrabKeys(Client* client)
+{
+  KeyCode code;
+
+  XUngrabKey(display, AnyKey, AnyModifier, root);
+  for (unsigned int i = 0; i < LENGTH(keys); i++)
+    if ((code = XKeysymToKeycode(display, keys[i].keysym)))
+      XGrabKey(display, code, keys[i].mod, client->window, True,
+               GrabModeAsync, GrabModeAsync);
+    else
+      fprintf(stderr, __WM_NAME__": Error grabbing key %ld\n", keys[i].keysym);
 }
 
 void LayoutTile(Monitor* monitor)
@@ -362,6 +376,8 @@ void IOFocusClientWindow(int d)
 void IOToggleFullscreen()
 {
   Client* cp;
+
+  fprintf(stderr, "Toggling Fullscreen!!!");
 
   if (!(cp = monitors[selmon].focused)) return;
 

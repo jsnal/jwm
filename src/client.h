@@ -58,6 +58,8 @@ void ManageInputFocus(Client* client);
 void ManageApplySize(Client* client);
 void ManageArrange(Client* client);
 
+void ManageGrabKeys(Client* client);
+
 void IOFocusClientWindow(int d);
 void IOToggleFullscreen();
 
