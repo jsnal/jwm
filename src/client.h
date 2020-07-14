@@ -4,13 +4,46 @@
 #include "constants.h"
 #include "jwm.h"
 
+#include <X11/Xatom.h>
 #include <string.h>
 #include <stdlib.h>
 
+/*
+ * List of the layouts supported. Based no there place, a call is made to the
+ * proper funciton in ManageArrange. The default Layout it Tile.
+ */
 typedef enum {
   Tile, Stack
 } Layouts;
 
+typedef enum {
+  AtomNetSupported,
+  AtomNetSupportingWMCheck,
+  AtomNetWMName,
+  AtomNetWMState,
+  AtomNetWMStateFullscreen,
+  AtomNetWMWindowType,
+  AtomNetWMWindowTypeDialog,
+  AtomNetWMWindowTypeMenu,
+  AtomNetWMWindowTypeSplash,
+  AtomNetWMWindowTypeToolbar,
+  AtomNetWMWindowTypeUtility,
+  AtomNetLast
+} AtomsNet;
+
+typedef enum {
+  AtomWMDeleteWindow,
+  AtomWMProtocols,
+  AtomWMState,
+  AtomWMTakeFocus,
+  AtomWMLast
+} AtomsWM;
+
+/*
+ * Structure of a Client (window) within the window manager. This is a linked
+ * list which means it can be easily traversed using *next. The data within the
+ * Client struct must always be the most updated information to work properly.
+ */
 typedef struct Client {
   Window window; // Client window
 
@@ -51,8 +84,8 @@ typedef struct Key {
 } Key;
 
 Client* AddClientWindow(Window w);
-void RemoveClientWindow(Client* client);
 Client* GetClientFromWindow(Window w);
+void RemoveClientWindow(Client* client);
 void RemoveDecorations(Client* client);
 
 void ManageFocus(Client* client);
@@ -69,7 +102,11 @@ void IOKillClient(const Arg* arg);
 // Master list of all the known clients
 Client* clients;
 Monitor* monitors;
+
+/* TODO: Make these values dynamic in some way. Config? */
 unsigned int minWindowWidth;
 unsigned int minWindowHeight;
 unsigned int selmon;
+
+Atom atomNet[AtomNetLast], atomWM[AtomWMLast];
 #endif

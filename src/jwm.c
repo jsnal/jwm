@@ -4,6 +4,7 @@
 #include <X11/extensions/Xrandr.h>
 
 static void SetupMonitors();
+static void SetupHints();
 static Cursor cursor_default;
 
 bool Create()
@@ -21,9 +22,15 @@ bool Create()
   screen = DefaultScreen(display);
 
   SetupMonitors();
+  SetupHints();
 
   cursor_default = XCreateFontCursor(display, XC_left_ptr);
   XDefineCursor(display, root, cursor_default);
+
+  XChangeProperty(display, root, atomNet[AtomNetWMName],
+                  XInternAtom(display, "UTF8_STRING", False), 8,
+                  PropModeReplace, (unsigned char *)__WM_NAME__,
+                  strlen(__WM_NAME__));
 
   return true;
 }
@@ -44,6 +51,7 @@ void Start()
            XDisplayString(display));
     return;
   }
+
 
   XSetErrorHandler(OnXError);
   XGrabServer(display);
@@ -81,6 +89,31 @@ void Destroy()
 {
   free(clients);
   free(monitors);
+}
+
+void SetupHints()
+{
+  fprintf(stderr ,"setting up hints");
+  atomNet[AtomNetSupported] = XInternAtom(display, "_NET_SUPPORTED", False);
+  atomNet[AtomNetSupportingWMCheck] = XInternAtom(display, "_NET_SUPPORTING_WM_CHECK", False);
+  atomNet[AtomNetWMName] = XInternAtom(display, "_NET_WM_NAME", False);
+  atomNet[AtomNetWMState] = XInternAtom(display, "_NET_WM_STATE", False);
+  atomNet[AtomNetWMStateFullscreen] = XInternAtom(display, "_NET_WM_STATE_FULLSCREEN", False);
+
+  atomNet[AtomNetWMWindowType] = XInternAtom(display, "_NET_WM_WINDOW_TYPE", False);
+  atomNet[AtomNetWMWindowTypeDialog] = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DIALOG", False);
+  atomNet[AtomNetWMWindowTypeMenu] = XInternAtom(display, "_NET_WM_WINDOW_TYPE_MENU", False);
+  atomNet[AtomNetWMWindowTypeSplash] = XInternAtom(display, "_NET_WM_WINDOW_TYPE_SPLASH", False);
+  atomNet[AtomNetWMWindowTypeToolbar] = XInternAtom(display, "_NET_WM_WINDOW_TYPE_TOOLBAR", False);
+  atomNet[AtomNetWMWindowTypeUtility] = XInternAtom(display, "_NET_WM_WINDOW_TYPE_UTILITY", False);
+
+  XChangeProperty(display, root, atomNet[AtomNetSupported], XA_ATOM, 32,
+      PropModeReplace, (unsigned char *) atomNet, AtomNetLast);
+
+  atomWM[AtomWMDeleteWindow] = XInternAtom(display, "WM_DELETE_WINDOW", False);
+  atomWM[AtomWMProtocols] = XInternAtom(display, "WM_PROTOCOLS", False);
+  atomWM[AtomWMState] = XInternAtom(display, "WM_STATE", False);
+  atomWM[AtomWMTakeFocus] = XInternAtom(display, "WM_TAKE_FOCUS", False);
 }
 
 void SetupMonitors()

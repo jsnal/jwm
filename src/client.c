@@ -35,8 +35,6 @@ Client* AddClientWindow(Window w)
   cp->border_width = attr.border_width;
   cp->fullscreen = false;
 
-  /* CreateDecorations(cp); */
-
   XSelectInput(
       display,
       cp->window,
@@ -47,42 +45,6 @@ Client* AddClientWindow(Window w)
 
   ManageArrange(cp);
   ManageFocus(cp);
-
-  /* XGrabKey( */
-  /*     display, */
-  /*     XKeysymToKeycode(display, XK_Tab), */
-  /*     Mod1Mask, */
-  /*     cp->window, */
-  /*     false, */
-  /*     GrabModeAsync, */
-  /*     GrabModeAsync); */
-  /*  */
-  /* XGrabKey( */
-  /*     display, */
-  /*     XKeysymToKeycode(display, XK_j), */
-  /*     Mod1Mask, */
-  /*     cp->window, */
-  /*     false, */
-  /*     GrabModeAsync, */
-  /*     GrabModeAsync); */
-  /*  */
-  /* XGrabKey( */
-  /*     display, */
-  /*     XKeysymToKeycode(display, XK_k), */
-  /*     Mod1Mask, */
-  /*     cp->window, */
-  /*     false, */
-  /*     GrabModeAsync, */
-  /*     GrabModeAsync); */
-  /*  */
-  /* XGrabKey( */
-  /*     display, */
-  /*     XKeysymToKeycode(display, XK_f), */
-  /*     Mod1Mask, */
-  /*     cp->window, */
-  /*     false, */
-  /*     GrabModeAsync, */
-  /*     GrabModeAsync); */
 
   D fprintf(stderr, __WM_NAME__": Client window added: %ld\n",
             cp->window);
@@ -113,8 +75,6 @@ void ManageInputFocus(Client* client)
 void ManageFocus(Client* client)
 {
   if (!client) return;
-
-  printf("running manage focus\n");
 
   // Save the current focused window and the previous focued window;
   monitors[client->monitor].focused = client;
@@ -153,6 +113,10 @@ void ManageFullscreen(Client* client)
     client->w = mp->mw;
     client->h = mp->mh;
 
+    XChangeProperty(display, client->window, atomNet[AtomNetWMState], XA_ATOM,
+                    32, PropModeReplace,
+                    (unsigned char*)&atomNet[AtomNetWMStateFullscreen], 1);
+
     RemoveDecorations(client);
     ManageApplySize(client);
   }
@@ -173,6 +137,8 @@ void ManageUnfullscreen(Client* client)
     client->w = client->old_w;
     client->h = client->old_h;
 
+    XDeleteProperty(display, client->window, atomNet[AtomNetWMState]);
+
     ManageApplySize(client);
     ManageArrange(client);
     CreateDecorations(client);
@@ -186,15 +152,9 @@ void ManageArrange(Client* client)
   Monitor* mp = &monitors[client->monitor];
   switch(mp->layout)
   {
-    case 0:
-      LayoutTile(mp);
-      break;
-    case 1:
-      LayoutStack(mp);
-      break;
-    default:
-      LayoutTile(mp);
-      break;
+    case 0:  LayoutTile(mp);  break;
+    case 1:  LayoutStack(mp); break;
+    default: LayoutTile(mp);  break;
   }
 }
 
