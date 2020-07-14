@@ -81,42 +81,16 @@ void HandleUnmapNotify(const XUnmapEvent* event)
 void HandleKeyPress(const XKeyEvent* event)
 {
   Client* cp;
-
   if (!(cp = GetClientFromWindow(event->window))) return;
 
-  KeySym keysym;
-  keysym = XKeysymToKeycode(display, (KeyCode) event->keycode);
-  fprintf(stderr, "Keycode %ld\n", keysym);
-
-  for (unsigned int i = 0; i < LENGTH(keys); i++) {
-
-    fprintf(stderr, "Keycode %ld\n", keys[i].keysym);
-    if (keysym == keys[i].keysym && keys[i].func && (event->state & keys[i].mod)) {
-      fprintf(stderr, "Keycode %ld\n", keys[i].keysym);
+  for (unsigned int i = 0; i < LENGTH(keys); i++)
+    if (event->keycode == XKeysymToKeycode(display, keys[i].keysym)
+        && keys[i].func
+        && (event->state & keys[i].mod))
+    {
+      D fprintf(stdout, __WM_NAME__": Keypress detected: %ld\n", keys[i].keysym);
       keys[i].func(&(keys[i].arg));
     }
-  }
-
-  /* if ((event->state & Mod1Mask) && */
-  /*     (event->keycode == XKeysymToKeycode(display, XK_Tab))) */
-  /* { */
-  /*   ManageArrange(cp); */
-  /* } */
-  /* else if ((event->state & Mod1Mask) && */
-  /*          (event->keycode == XKeysymToKeycode(display, XK_j))) */
-  /* { */
-  /*   IOFocusClientWindow(1); */
-  /* } */
-  /* else if ((event->state & Mod1Mask) && */
-  /*          (event->keycode == XKeysymToKeycode(display, XK_k))) */
-  /* { */
-  /*   IOFocusClientWindow(-1); */
-  /* } */
-  /* else if ((event->state & Mod1Mask) && */
-  /*          (event->keycode == XKeysymToKeycode(display, XK_f))) */
-  /* { */
-  /*   IOToggleFullscreen(); */
-  /* } */
 }
 
 void HandleFocusIn(const XFocusInEvent* event)

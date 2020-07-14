@@ -204,9 +204,10 @@ void ManageGrabKeys(Client* client)
 
   XUngrabKey(display, AnyKey, AnyModifier, root);
   for (unsigned int i = 0; i < LENGTH(keys); i++)
-    if ((code = XKeysymToKeycode(display, keys[i].keysym)))
+    if ((code = XKeysymToKeycode(display, keys[i].keysym))) {
       XGrabKey(display, code, keys[i].mod, client->window, True,
                GrabModeAsync, GrabModeAsync);
+    }
     else
       fprintf(stderr, __WM_NAME__": Error grabbing key %ld\n", keys[i].keysym);
 }
@@ -343,14 +344,14 @@ Client* GetClientFromWindow(Window w)
  * you input -1, you will step backwards one item. This code is heavily inpirsed
  * by dwm's single linked list traverser.
  */
-void IOFocusClientWindow(int d)
+void IOFocusClientWindow(const Arg* arg)
 {
   Client* cp = NULL, *icp = NULL;
   Monitor* mp;
 
   if (!(mp = &monitors[selmon])) return;
 
-  if (d > 0)
+  if (arg->i > 0)
   {
     for (cp = mp->focused->next; cp && !IsClientOnMonitor(cp, mp); cp = cp->next);
     if (!cp)
@@ -373,11 +374,9 @@ void IOFocusClientWindow(int d)
   }
 }
 
-void IOToggleFullscreen()
+void IOToggleFullscreen(const Arg* arg)
 {
   Client* cp;
-
-  fprintf(stderr, "Toggling Fullscreen!!!");
 
   if (!(cp = monitors[selmon].focused)) return;
 

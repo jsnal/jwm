@@ -53,15 +53,15 @@ Client* AddClientWindow(Window w);
 void RemoveClientWindow(Client* client);
 Client* GetClientFromWindow(Window w);
 void RemoveDecorations(Client* client);
+
 void ManageFocus(Client* client);
 void ManageInputFocus(Client* client);
 void ManageApplySize(Client* client);
 void ManageArrange(Client* client);
-
 void ManageGrabKeys(Client* client);
 
-void IOFocusClientWindow(int d);
-void IOToggleFullscreen();
+void IOFocusClientWindow(const Arg* arg);
+void IOToggleFullscreen(const Arg* arg);
 
 // Master list of all the known clients
 Client* clients;
