@@ -93,7 +93,6 @@ void Destroy()
 
 void SetupHints()
 {
-  fprintf(stderr ,"setting up hints");
   atomNet[AtomNetSupported] = XInternAtom(display, "_NET_SUPPORTED", False);
   atomNet[AtomNetSupportingWMCheck] = XInternAtom(display, "_NET_SUPPORTING_WM_CHECK", False);
   atomNet[AtomNetWMName] = XInternAtom(display, "_NET_WM_NAME", False);

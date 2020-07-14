@@ -95,11 +95,10 @@ void HandleKeyPress(const XKeyEvent* event)
 
 void HandleFocusIn(const XFocusInEvent* event)
 {
-  D fprintf(stderr, __WM_NAME__": Window going in focus: %ld\n",
-            event->window);
   Client* cp;
-
   if (!(cp = GetClientFromWindow(event->window))) return;
+
+  D fprintf(stderr, __WM_NAME__": Window going in focus: %p\n", (void*) cp);
 
   if (!cp->fullscreen)
     ManageFocus(cp);
@@ -108,10 +107,9 @@ void HandleFocusIn(const XFocusInEvent* event)
 void HandleFocusOut(const XFocusOutEvent* event)
 {
   Client* cp;
-
-  D fprintf(stderr, __WM_NAME__": Window going out of focus: %ld\n",
-            event->window);
-
   if (!(cp = GetClientFromWindow(event->window))) return;
+
+  D fprintf(stderr, __WM_NAME__": Window going out of focus: %p\n", (void*) cp);
+
   RemoveDecorations(cp);
 }

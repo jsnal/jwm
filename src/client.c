@@ -46,8 +46,7 @@ Client* AddClientWindow(Window w)
   ManageArrange(cp);
   ManageFocus(cp);
 
-  D fprintf(stderr, __WM_NAME__": Client window added: %ld\n",
-            cp->window);
+  D fprintf(stderr, __WM_NAME__": Client window added: %p\n", (void*) cp);
 
   return cp;
 }
@@ -170,6 +169,40 @@ void ManageGrabKeys(Client* client)
     }
     else
       fprintf(stderr, __WM_NAME__": Error grabbing key %ld\n", keys[i].keysym);
+}
+
+int ManageSendEvent(Client* client, Atom atom)
+{
+  int n, exists = 0;
+  Atom *protocols;
+  XEvent ev;
+
+  /* Check if the Atom protocol even exists on the current window */
+  if (XGetWMProtocols(display, client->window, &protocols, &n))
+  {
+    while (!exists && n--)
+      exists = protocols[n] == atom;
+    XFree(protocols);
+  }
+
+  if (exists)
+  {
+    ev.type = ClientMessage;
+    ev.xclient.window = client->window;
+    ev.xclient.message_type = atomWM[AtomWMProtocols];
+    ev.xclient.format = 32;
+    ev.xclient.data.l[0] = atom;
+    ev.xclient.data.l[1] = CurrentTime;
+    XSendEvent(display, client->window, False, NoEventMask, &ev);
+
+    D fprintf(stderr, __WM_NAME__": ICCCM: Atom %lu sent to client %p\n",
+              atom, (void*) client);
+  }
+  else
+    D fprintf(stderr, __WM_NAME__": ICCCM: Unable to send atom %lu to client %p\n",
+              atom, (void*) client);
+
+  return exists;
 }
 
 void LayoutTile(Monitor* monitor)
@@ -355,20 +388,28 @@ void IOSetLayout(const Arg* arg)
   Client* cp;
   if (!(cp = monitors[selmon].focused)) return;
 
-  ManageArrange(cp);
+  if (IsClientOnMonitor(cp, mp))
+    ManageArrange(cp);
 }
 
+/*
+ * Try to kill the client window by sending an atom event signal of
+ * WM_DELETE_WINDOW. Since some programs won't have this protocol hooked up, it
+ * will fail sometimes. In this case brutally kill the client using XKillClient
+ * and other X functions. If at all possible don't use this method.
+ */
 void IOKillClient(const Arg* arg)
 {
   Client* cp;
   if (!(cp = monitors[selmon].focused)) return;
 
-  /* TODO: Try to shutdown more gracefully using ATOM events */
-  XGrabServer(display);
-  XSetErrorHandler(OnXErrorSuppress);
-  XSetCloseDownMode(display, DestroyAll);
-  XKillClient(display, cp->window);
-  XSync(display, False);
-  XSetErrorHandler(OnXError);
-  XUngrabServer(display);
+  if (!ManageSendEvent(cp, atomWM[AtomWMDeleteWindow])) {
+    XGrabServer(display);
+    XSetErrorHandler(OnXErrorSuppress);
+    XSetCloseDownMode(display, DestroyAll);
+    XKillClient(display, cp->window);
+    XSync(display, False);
+    XSetErrorHandler(OnXError);
+    XUngrabServer(display);
+  }
 }
