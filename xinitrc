@@ -1,2 +1,2 @@
-st &
+exec st&
 exec ./jwm

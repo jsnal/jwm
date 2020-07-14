@@ -4,9 +4,12 @@
 #include "constants.h"
 #include "jwm.h"
 
-#include <X11/Xatom.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <X11/Xatom.h>
 
 /*
  * List of the layouts supported. Based no there place, a call is made to the
@@ -99,6 +102,7 @@ void IOFocusClientWindow(const Arg* arg);
 void IOToggleFullscreen(const Arg* arg);
 void IOSetLayout(const Arg* arg);
 void IOKillClient(const Arg* arg);
+void IOSpawn(const Arg* arg);
 
 // Master list of all the known clients
 Client* clients;

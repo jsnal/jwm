@@ -413,3 +413,17 @@ void IOKillClient(const Arg* arg)
     XUngrabServer(display);
   }
 }
+
+void IOSpawn(const Arg* arg)
+{
+  if (fork() == 0)
+  {
+    D fprintf(stderr, __WM_NAME__": Spawning: %s\n", ((char **) arg->v)[0]);
+    if (display)
+      close(ConnectionNumber(display));
+    setsid();
+    execvp(((char **) arg->v)[0], (char **)arg->v);
+    perror(__WM_NAME__": Spawn failed");
+    exit(EXIT_SUCCESS);
+  }
+}
