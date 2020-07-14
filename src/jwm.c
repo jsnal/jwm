@@ -124,6 +124,11 @@ int OnXError(Display* display, XErrorEvent* e)
   return 0;
 }
 
+int OnXErrorSuppress(Display* display, XErrorEvent* e)
+{
+  return 0;
+}
+
 int OnWMDetected(Display* display, XErrorEvent* e)
 {
   if ((int)e->error_code == BadAccess)

@@ -40,6 +40,7 @@ typedef union Arg {
   unsigned int ui;
   float f;
   const void *v;
+  Layouts ly;
 } Arg;
 
 typedef struct Key {
@@ -62,6 +63,8 @@ void ManageGrabKeys(Client* client);
 
 void IOFocusClientWindow(const Arg* arg);
 void IOToggleFullscreen(const Arg* arg);
+void IOSetLayout(const Arg* arg);
+void IOKillClient(const Arg* arg);
 
 // Master list of all the known clients
 Client* clients;

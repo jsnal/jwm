@@ -377,11 +377,38 @@ void IOFocusClientWindow(const Arg* arg)
 void IOToggleFullscreen(const Arg* arg)
 {
   Client* cp;
-
   if (!(cp = monitors[selmon].focused)) return;
 
   if (cp->fullscreen)
     ManageUnfullscreen(cp);
   else
     ManageFullscreen(cp);
+}
+
+void IOSetLayout(const Arg* arg)
+{
+  Monitor* mp;
+  if (!(mp = &monitors[selmon])) return;
+
+  mp->layout = arg->ly;
+
+  Client* cp;
+  if (!(cp = monitors[selmon].focused)) return;
+
+  ManageArrange(cp);
+}
+
+void IOKillClient(const Arg* arg)
+{
+  Client* cp;
+  if (!(cp = monitors[selmon].focused)) return;
+
+  /* TODO: Try to shutdown more gracefully using ATOM events */
+  XGrabServer(display);
+  XSetErrorHandler(OnXErrorSuppress);
+  XSetCloseDownMode(display, DestroyAll);
+  XKillClient(display, cp->window);
+  XSync(display, False);
+  XSetErrorHandler(OnXError);
+  XUngrabServer(display);
 }

@@ -12,6 +12,7 @@ bool Create();
 void Start();
 void Destroy();
 int OnXError(Display* display, XErrorEvent* e);
+int OnXErrorSuppress(Display* display, XErrorEvent* e);
 int OnWMDetected(Display* display, XErrorEvent* e);
 
 bool wmFound;
