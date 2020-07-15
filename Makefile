@@ -1,8 +1,9 @@
 CC = gcc
 
-LIBS = -lX11 -lstdc++ -lXrandr
+LIBS = -lX11 -lXrandr
 INCLUDES = -I/usr/include/freetype2
-CFLAGS = -I. -Wall $(LIBS) $(INCLUDES)
+CFLAGS = -Wall -O2 -Werror=format-security
+CFLAGS += $(LIBS) $(INCLUDES)
 
 all: jwm
 
@@ -22,7 +23,6 @@ SOURCES = \
 	 src/event.c \
 	 src/main.c
 
-EXECUTABLE = $(OUTPUTS:%=$(BIN)/%)
 OBJECTS = $(SOURCES:.c=.o)
 
 jwm: $(HEADERS) $(OBJECTS)
