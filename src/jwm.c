@@ -18,8 +18,8 @@ bool Create()
     return false;
   }
 
-  root = DefaultRootWindow(display);
   screen = DefaultScreen(display);
+  root = RootWindow(display, screen);
 
   SetupMonitors();
   SetupHints();
@@ -31,6 +31,8 @@ bool Create()
                   XInternAtom(display, "UTF8_STRING", False), 8,
                   PropModeReplace, (unsigned char *)__WM_NAME__,
                   strlen(__WM_NAME__));
+
+  ManageGrabKeys();
 
   return true;
 }

@@ -157,14 +157,14 @@ void ManageArrange(Client* client)
   }
 }
 
-void ManageGrabKeys(Client* client)
+void ManageGrabKeys()
 {
   KeyCode code;
-
   XUngrabKey(display, AnyKey, AnyModifier, root);
+
   for (unsigned int i = 0; i < LENGTH(keys); i++)
     if ((code = XKeysymToKeycode(display, keys[i].keysym))) {
-      XGrabKey(display, code, keys[i].mod, client->window, True,
+      XGrabKey(display, code, keys[i].mod, root, True,
                GrabModeAsync, GrabModeAsync);
     }
     else

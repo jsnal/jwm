@@ -95,7 +95,7 @@ void ManageFocus(Client* client);
 void ManageInputFocus(Client* client);
 void ManageApplySize(Client* client);
 void ManageArrange(Client* client);
-void ManageGrabKeys(Client* client);
+void ManageGrabKeys(t);
 int ManageSendEvent(Client* client, Atom atom);
 
 void IOFocusClientWindow(const Arg* arg);

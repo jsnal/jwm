@@ -80,9 +80,6 @@ void HandleUnmapNotify(const XUnmapEvent* event)
 
 void HandleKeyPress(const XKeyEvent* event)
 {
-  Client* cp;
-  if (!(cp = GetClientFromWindow(event->window))) return;
-
   for (unsigned int i = 0; i < LENGTH(keys); i++)
     if (event->keycode == XKeysymToKeycode(display, keys[i].keysym)
         && keys[i].func
